@@ -318,7 +318,7 @@ It will help us understand why the neural network failed sometimes to classify i
 """
 
 nsample = 1000
-X_demo = X_test[:nsample,:]
+X_demo = X_test[:nsample]
 y_demo = ffnn.forward_pass(X_demo)
 
 y_true = y_test[:nsample]
@@ -327,8 +327,8 @@ index_to_plot = 50
 plot_one_image(X_demo, y_test, index_to_plot)
 
 # Compare to the prediction 
-prediction = np.argmax(y_demo[index_to_plot,:])
-true_target = np.argmax(y_true[index_to_plot,:])
+prediction = np.argmax(y_demo[index_to_plot])
+true_target = np.argmax(y_true[index_to_plot])
 
 # is it the same number ?
 
