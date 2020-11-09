@@ -323,7 +323,7 @@ y_demo = ffnn.forward_pass(X_demo)
 
 y_true = y_test[:nsample]
 
-index_to_plot = 505
+index_to_plot = 50
 plot_one_image(X_demo, y_test, index_to_plot)
 
 # Compare to the prediction 
@@ -341,6 +341,7 @@ for i in range(0, nsample-1):
     if prediction != true_target:
         # TODO
         print("Oops, a miss prediction has been found...You predicted "+str(prediction)+" when in reality, it was "+str(true_target))
+    pass
 
 """## Open analysis
 
