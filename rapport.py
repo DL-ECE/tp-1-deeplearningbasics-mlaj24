@@ -94,7 +94,7 @@ plot_one_image(X_test, y_test , 250)
 
 # It's important to normalize the data before feeding it into the neural network
 def normalize_data(dataset: np.array) -> np.array:
-    normalized_dataset = dataset / np.linalg.norm(dataset)
+    normalized_dataset = dataset/np.max(dataset)
     return normalized_dataset
 
 """It's also important to find a good representation of the target.
@@ -113,7 +113,6 @@ For example, a `[0,1,9]` vector will become the following matrix:
 def target_to_one_hot(target: np.array) -> np.array:
 
     one_hot_matrix = np.eye(np.max(target)+1)[target]
-
     ###
     return one_hot_matrix
 
@@ -135,7 +134,7 @@ def d_sigmoid(M: np.array)-> np.array:
 def softmax(X: np.array)-> np.array:
     """Apply a softmax to the input array"""
     # TODO
-    return np.exp(X)/sum(np.exp(X))
+    return np.exp(X)/np.sum(np.exp(X), axis=1).reshape(-1,1)
 
 """## Feed forward NN
 
@@ -208,7 +207,7 @@ class FFNN:
     def forward_pass(self, input_data: np.array)-> np.array:
         # TODO: perform the whole forward pass using the on_step_forward function
         self.layers[0].Z = input_data
-        for i in range(1, self.nlayers-1):
+        for i in range(1, self.nlayers):
             self.layers[i].Z = self.one_step_forward(self.layers[i-1].Z, self.layers[i])
         return self.layers[-1].Z
     
@@ -259,8 +258,8 @@ class FFNN:
             # TODO: get y_pred using the forward pass
             error_sum += self.get_error(self.forward_pass(X_batch), y_batch)
         return error_sum / nbatch
-            
-        
+    
+
     def train(self, nepoch, X_train, y_train, X_test, y_test)-> float:
         X_train = X_train.reshape(-1, self.minibatch_size, 784)
         y_train = y_train.reshape(-1, self.minibatch_size, 10)
@@ -295,10 +294,10 @@ It's on 12 points because there is a lot of functions to fill but also we want t
 To have all the point your neural network needs to have a Test accuracy > 92 % !!
 """
 
-minibatch_size = 5
-nepoch = 10
+minibatch_size = 20
+nepoch = 25
 learning_rate = 0.01
-ffnn = FFNN(config=[784, 3, 3, 10], minibatch_size=minibatch_size, learning_rate=learning_rate)
+ffnn = FFNN(config=[784, 35, 35, 10], minibatch_size=minibatch_size, learning_rate=learning_rate)
 
 assert X_train.shape[0] % minibatch_size == 0
 assert X_test.shape[0] % minibatch_size == 0
@@ -336,11 +335,13 @@ true_target = np.argmax(y_true[index_to_plot])
 
 for i in range(0, nsample-1):   
     prediction = np.argmax(y_demo[i]) # Todo
-    true_target = np.argmax(y_test[i]) # Todo
+    true_target = int(y_true[i]) # Todo
     print(str(prediction) + " = "+str(true_target)+" ?")
     if prediction != true_target:
         # TODO
         print("Oops, a miss prediction has been found...You predicted "+str(prediction)+" when in reality, it was "+str(true_target))
+    else :
+      print("You predicted well !")
     pass
 
 """## Open analysis
@@ -359,3 +360,37 @@ Also explain how the neural network behave when changing them ?
 TODO
 """
 
+# 1st try (initial values) : minibatch_size = 5 ; nepoch = 10 ; config = [784, 3, 4, 10] ; learning_rate = 0.01
+#
+# Final training accuracy : 62.8% ; Final Test accuracy : 62.6%
+#
+# Even though, as we progress through every epoch, all accuracies go up, their ceiling is not satisfying enough for even a good neural network
+#
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# If we just add more neurons to our layers (config = [784, 35, 35, 10]. All other parameters remains the same), both accuracy start and end at a way better percentage
+# making our network more solid by far
+#
+# Final training accuracy : 94.3% ; Final Test Accuracy : 93.0%
+#
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# As both accuracies go up while progressing through each epoch, raising the total number of epochs allow the neural network to push its ceiling even further
+# Let's now have a nepoch = 25
+#
+# Instead of just 94.3% and 93.0%, both accuracies will reach a higher final value, respectively 96.7% and 93.7%, making the network even more solid
+#
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# The batch size is the number of samples by epoch used to evaluate the accuracy of our network. Normally, when it goes up, accuracy does as well
+# Let's now have a minibatch_size = 20
+#
+# With these parameters, the training accuracy still remains at 96.7% but the test accuracy is better, going as high as 94.3%, which is excellent.
+#
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#
+# The learning rate, as it says itself, is the parameter that tells how fast our network updates its weights to the optimum point, where the loss is minimum. It is from 0 to 1
+# A too small learning rate makes the training slower with the risk to see it stuck, whereas a too large learning rate cause the network to adapt too fast and unstable
+# The dault value used for most of known models is 0.01, which is the value of our learning rate. If we make it smaller, like 0.005 :
+#
+# Both accuracies are smaller by 1 to 1.5 points as the training is longer to proceed and the number of epochs didn't move
